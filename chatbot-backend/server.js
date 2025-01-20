@@ -113,6 +113,7 @@ app.post("/chat", async (req, res) => {
         if (query.toLowerCase() === "what is my email") {
             return res.send({ reply: `Your email is ${email}.` });
         }
+
         // Handle summarization-specific queries
         const summaryTriggers = ["summarize our conversation", "summarize chat"];
         if (summaryTriggers.some((trigger) => query.toLowerCase().includes(trigger))) {
@@ -132,6 +133,25 @@ app.post("/chat", async (req, res) => {
 
                     // Concatenate chat history for summarization
                     const chatHistory = results.map((row) => row.message).join("\n");
+
+                    try {
+                        const openaiResponse = await openai.chat.completions.create({
+                            model: "gpt-3.5-turbo",
+                            messages: [{ role: "user", content: `Summarize the following chat history:\n\n${chatHistory}` }],
+                            max_tokens: 200,
+                            temperature: 0.7,
+                        });
+
+                        const summary = openaiResponse.choices[0].message.content.trim();
+                        return res.send({ reply: summary });
+                    } catch (apiError) {
+                        console.error("Error with OpenAI API:", apiError);
+                        return res.status(500).send({ reply: "Unable to summarize the chat at the moment." });
+                    }
+                }
+            );
+            return;
+        }
 
         // Handle OpenAI API response
         try {

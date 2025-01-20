@@ -8,7 +8,7 @@ require("dotenv").config();
 const app = express();
 
 // Define allowed origin
-const allowedOrigins = ['https://chat-buddy-nine.vercel.app'];
+const allowedOrigins = ['https://chat-buddy-production.up.railway.app/'];
 
 app.use(cors({
     origin: (origin, callback) => {

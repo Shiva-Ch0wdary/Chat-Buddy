@@ -3,21 +3,31 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mysql = require("mysql2");
 const { OpenAI } = require("openai");
-require("dotenv").config(); // Load .env variables
+require("dotenv").config();
 
 const app = express();
-// Define allowed origins for CORS
-const allowedOrigins = ['https://chat-buddy-nine.vercel.app/']; // Add your frontend URL here
+
+// Define allowed origin
+const allowedOrigins = ['https://chat-buddy-nine.vercel.app'];
+
 app.use(cors({
-    origin: allowedOrigins, // Only allow requests from specified origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
-    credentials: true, // Allow credentials like cookies
+    origin: (origin, callback) => {
+        if (allowedOrigins.includes(origin) || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
 }));
 
-// Handle preflight requests
+// Preflight request handling
 app.options('*', cors());
 
+// Other middlewares
 app.use(bodyParser.json());
+
 
 // MySQL Configuration
 const db = mysql.createConnection({

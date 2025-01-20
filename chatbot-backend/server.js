@@ -10,7 +10,6 @@ const app = express();
 // Define allowed origin
 const allowedOrigins = ['https://chat-buddy-nine.vercel.app', 'http://localhost:3000'];
 
-const cors = require("cors");
 
 // Allow all origins
 app.use(cors({

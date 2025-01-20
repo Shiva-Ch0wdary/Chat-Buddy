@@ -15,6 +15,8 @@ ChatBuddy is an intelligent chatbot application designed to assist users with pr
      - **how are you** → "I am just a bot, but I am functioning as expected!"
      - **summarize our conversation** → Summarizes the entire chat history.
 
+![Sample DataBase](/Database_1.png)
+
 3. **Dynamic Responses**
    - Uses OpenAI API to generate responses for queries not found in the database.
 

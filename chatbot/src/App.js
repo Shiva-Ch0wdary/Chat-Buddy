@@ -28,11 +28,11 @@ function App() {
             setMessages([...messages, userMessage]);
 
             try {
-                const response = await axios.post("https://chat-buddy-production.up.railway.app/", {
+                const response = await axios.post("https://chat-buddy-production.up.railway.app/chat", {
                     email,
                     name,
                     query: input,
-                });
+                });                
 
                 const botMessage = { sender: "bot", text: response.data.reply };
                 setMessages((prev) => [...prev, botMessage]);

@@ -6,7 +6,17 @@ const { OpenAI } = require("openai");
 require("dotenv").config(); // Load .env variables
 
 const app = express();
-app.use(cors());
+// Define allowed origins for CORS
+const allowedOrigins = ['https://chat-buddy-nine.vercel.app/']; // Add your frontend URL here
+app.use(cors({
+    origin: allowedOrigins, // Only allow requests from specified origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these HTTP methods
+    credentials: true, // Allow credentials like cookies
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
 app.use(bodyParser.json());
 
 // MySQL Configuration

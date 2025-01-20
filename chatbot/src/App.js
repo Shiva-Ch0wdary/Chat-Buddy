@@ -28,7 +28,7 @@ function App() {
             setMessages([...messages, userMessage]);
 
             try {
-                const response = await axios.post("http://localhost:5000/chat", {
+                const response = await axios.post("https://chat-buddy-production.up.railway.app/", {
                     email,
                     name,
                     query: input,

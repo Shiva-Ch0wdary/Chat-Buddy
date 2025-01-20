@@ -55,6 +55,10 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Use API key from .env file
 });
 
+app.get("/test",  async (req, res) => {
+console.log("testing");
+});
+
 // Chat Endpoint
 app.post("/chat", async (req, res) => {
     const { email, query, name } = req.body;

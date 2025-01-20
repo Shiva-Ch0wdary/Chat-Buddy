@@ -8,7 +8,7 @@ require("dotenv").config();
 const app = express();
 
 // Define allowed origin
-const allowedOrigins = ['https://chat-buddy-production.up.railway.app/'];
+const allowedOrigins = ['https://chat-buddy-production.up.railway.app/', 'http://localhost:3000'];
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -57,6 +57,18 @@ db.query('SELECT 1', (err, results) => {
 // OpenAI Configuration
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Use API key from .env file
+});
+
+openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: "Hello, OpenAI!" }],
+    max_tokens: 50,
+})
+.then(response => {
+    console.log("OpenAI Test Success:", response.choices[0].message.content);
+})
+.catch(err => {
+    console.error("OpenAI Test Failed:", err);
 });
 
 // Chat Endpoint

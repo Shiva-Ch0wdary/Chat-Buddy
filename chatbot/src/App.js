@@ -24,15 +24,15 @@ function App() {
         }
 
         if (input.trim()) {
-            const userMessage = { sender: "user", text: input };
+            const userMessage = { sender: name, text: input }; // Use name dynamically
             setMessages([...messages, userMessage]);
 
             try {
-                const response = await axios.post("https://chat-buddy-production.up.railway.app/chat", {
+                const response = await axios.post("http://localhost:8080/chat", {
                     email,
                     name,
                     query: input,
-                });                
+                });
 
                 const botMessage = { sender: "bot", text: response.data.reply };
                 setMessages((prev) => [...prev, botMessage]);
@@ -131,7 +131,7 @@ function App() {
                                     key={index}
                                     style={{
                                         margin: "10px 0",
-                                        textAlign: msg.sender === "user" ? "right" : "left",
+                                        textAlign: msg.sender === name ? "right" : "left",
                                     }}
                                 >
                                     <strong>{msg.sender}:</strong> {msg.text}

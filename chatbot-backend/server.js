@@ -8,8 +8,7 @@ require("dotenv").config();
 const app = express();
 
 // Define allowed origin
-const allowedOrigins = ['https://chat-buddy-nine.vercel.app', 'http://localhost:3000'];
-
+const allowedOrigins = ['http://localhost:3000'];
 
 // Allow all origins
 app.use(cors({
@@ -22,16 +21,15 @@ app.use(cors({
 // Handle preflight requests
 app.options('*', cors());
 
-
 // Middleware
 app.use(bodyParser.json());
 
 // MySQL Configuration
 const db = mysql.createConnection({
-    host: process.env.MYSQLHOST,
-    user: process.env.MYSQLUSER,
-    password: process.env.MYSQLPASSWORD,
-    database: process.env.MYSQLDATABASE,
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
 });
 
 db.connect((err) => {
@@ -55,8 +53,8 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Use API key from .env file
 });
 
-app.get("/test",  async (req, res) => {
-console.log("testing");
+app.get("/test", async (req, res) => {
+    console.log("testing");
 });
 
 // Chat Endpoint
@@ -167,7 +165,7 @@ app.post("/chat", async (req, res) => {
             const botReply = openaiResponse.choices[0].message.content.trim();
 
             // Save the user query and bot reply to chat history
-            db.query("INSERT INTO chat_history (user_id, sender, message) VALUES (?, 'user', ?)", [userId, query]);
+            db.query("INSERT INTO chat_history (user_id, sender, message) VALUES (?, ?, ?)", [userId, userName, query]);
             db.query("INSERT INTO chat_history (user_id, sender, message) VALUES (?, 'bot', ?)", [userId, botReply]);
 
             res.send({ reply: botReply });
@@ -181,5 +179,5 @@ app.post("/chat", async (req, res) => {
 // Dynamic Port Configuration
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

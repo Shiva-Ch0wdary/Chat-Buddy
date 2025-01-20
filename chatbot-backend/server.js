@@ -10,20 +10,19 @@ const app = express();
 // Define allowed origin
 const allowedOrigins = ['https://chat-buddy-nine.vercel.app', 'http://localhost:3000'];
 
+const cors = require("cors");
+
+// Allow all origins
 app.use(cors({
-    origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin) || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
+    origin: '*', // Allow requests from any origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow all HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+    credentials: false, // Set to false as credentials are not necessary for unrestricted access
 }));
 
-// Preflight request handling
+// Handle preflight requests
 app.options('*', cors());
+
 
 // Middleware
 app.use(bodyParser.json());

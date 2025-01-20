@@ -8,7 +8,7 @@ require("dotenv").config();
 const app = express();
 
 // Define allowed origin
-const allowedOrigins = ['https://chat-buddy-production.up.railway.app/', 'http://localhost:3000'];
+const allowedOrigins = ['https://chat-buddy-nine.vercel.app', 'http://localhost:3000'];
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -25,9 +25,8 @@ app.use(cors({
 // Preflight request handling
 app.options('*', cors());
 
-// Other middlewares
+// Middleware
 app.use(bodyParser.json());
-
 
 // MySQL Configuration
 const db = mysql.createConnection({
@@ -53,22 +52,9 @@ db.query('SELECT 1', (err, results) => {
     }
 });
 
-
 // OpenAI Configuration
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY, // Use API key from .env file
-});
-
-openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: "Hello, OpenAI!" }],
-    max_tokens: 50,
-})
-.then(response => {
-    console.log("OpenAI Test Success:", response.choices[0].message.content);
-})
-.catch(err => {
-    console.error("OpenAI Test Failed:", err);
 });
 
 // Chat Endpoint
@@ -127,7 +113,6 @@ app.post("/chat", async (req, res) => {
         if (query.toLowerCase() === "what is my email") {
             return res.send({ reply: `Your email is ${email}.` });
         }
-
         // Handle summarization-specific queries
         const summaryTriggers = ["summarize our conversation", "summarize chat"];
         if (summaryTriggers.some((trigger) => query.toLowerCase().includes(trigger))) {
@@ -148,69 +133,31 @@ app.post("/chat", async (req, res) => {
                     // Concatenate chat history for summarization
                     const chatHistory = results.map((row) => row.message).join("\n");
 
-                    try {
-                        const openaiResponse = await openai.chat.completions.create({
-                            model: "gpt-3.5-turbo",
-                            messages: [{ role: "user", content: `Summarize the following chat history:\n\n${chatHistory}` }],
-                            max_tokens: 200,
-                            temperature: 0.7,
-                        });
+        // Handle OpenAI API response
+        try {
+            const openaiResponse = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
+                messages: [{ role: "user", content: query }],
+                max_tokens: 150,
+                temperature: 0.7,
+            });
 
-                        const summary = openaiResponse.choices[0].message.content.trim();
-                        return res.send({ reply: summary });
-                    } catch (apiError) {
-                        console.error("Error with OpenAI API:", apiError);
-                        return res.status(500).send({ reply: "Unable to summarize the chat at the moment." });
-                    }
-                }
-            );
-            return;
-        }
+            const botReply = openaiResponse.choices[0].message.content.trim();
 
-        // Save the user query to chat history
-        db.query("INSERT INTO chat_history (user_id, sender, message) VALUES (?, 'user', ?)", [userId, query]);
-
-        // Check for predefined responses
-        db.query("SELECT response FROM chatbot_responses WHERE query = ? LIMIT 1", [query.toLowerCase()], async (err, result) => {
-            if (err) {
-                console.error("Error querying database:", err);
-                return res.status(500).send({ reply: "Server error. Please try again later." });
-            }
-
-            let botReply;
-            if (result.length > 0) {
-                botReply = result[0].response;
-            } else {
-                // Use OpenAI for a response
-                try {
-                    const openaiResponse = await openai.chat.completions.create({
-                        model: "gpt-3.5-turbo",
-                        messages: [{ role: "user", content: query }],
-                        max_tokens: 150,
-                        temperature: 0.7,
-                    });
-
-                    botReply = openaiResponse.choices[0].message.content.trim();
-                } catch (apiError) {
-                    console.error("Error with OpenAI API:", apiError);
-                    return res.status(500).send({ reply: "Unable to process your request at the moment." });
-                }
-            }
-
-            // Save the bot reply to chat history
+            // Save the user query and bot reply to chat history
+            db.query("INSERT INTO chat_history (user_id, sender, message) VALUES (?, 'user', ?)", [userId, query]);
             db.query("INSERT INTO chat_history (user_id, sender, message) VALUES (?, 'bot', ?)", [userId, botReply]);
 
             res.send({ reply: botReply });
-        });
+        } catch (apiError) {
+            console.error("Error with OpenAI API:", apiError);
+            return res.status(500).send({ reply: "Unable to process your request at the moment." });
+        }
     });
 });
 
-const PORT = process.env.PORT || 5000;
+// Dynamic Port Configuration
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
-// Start Server
-// app.listen(5000, () => {
-//     console.log("Server running on http://localhost:5000");
-// });
